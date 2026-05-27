@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}综合知识模拟 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-2">📝 综合知识模拟 (75 题制)</h1>
+<p class="text-sm text-slate-500 mb-4">考试时间 2.5 小时,时间到自动提交。全选好后页底点提交。</p>
+
+{% include "_mock_timer.html" %}
+
+<form id="mock-form" method="post" action="/mock/mcq/{{ mock_id }}/submit" class="max-w-3xl">
+  {% for q in questions %}
+    <div class="bg-white rounded-lg shadow p-5 mb-4">
+      <div class="text-xs text-slate-400 mb-1">{{ loop.index }} / {{ questions|length }}  ·  Q#{{ q.id }}</div>
+      <div class="font-medium mb-3 whitespace-pre-wrap">{{ q.stem }}</div>
+      <ol class="space-y-1.5">
+        {% for opt in q.options %}
+          {% set letter = opt[0] %}
+          <li>
+            <label class="block p-2 rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input type="radio" name="q{{ q.id }}" value="{{ letter }}" class="mr-2">
+              <span class="font-mono mr-1">{{ letter }}.</span>{{ opt[3:] if opt.startswith(letter + '. ') else opt[2:] if opt.startswith(letter + '.') else opt }}
+            </label>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  {% endfor %}
+
+  <div class="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 flex gap-3 items-center">
+    <button class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">提交全部 ({{ questions|length }} 题)</button>
+    <a href="/mock/" class="text-sm text-slate-500 hover:text-indigo-700">放弃返回</a>
+  </div>
+</form>
+
+{% endblock %}

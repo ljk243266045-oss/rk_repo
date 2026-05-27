@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ tpl.title }} · 案例分析{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl">
+  <a href="/cases/" class="text-sm text-slate-500 hover:text-indigo-700">← 返回</a>
+  <h1 class="text-2xl font-bold mt-1 mb-3">{{ tpl.title }}</h1>
+  <div class="text-xs text-indigo-600 font-semibold mb-4">领域:{{ tpl.domain }}</div>
+
+  <section class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-bold mb-2">场景描述</h2>
+    <div class="text-slate-700 whitespace-pre-wrap leading-relaxed">{{ tpl.scenario }}</div>
+  </section>
+
+  <section class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-bold mb-2">问题</h2>
+    <ol class="space-y-3 text-slate-800">
+      {% for q in tpl.questions %}
+        <li class="whitespace-pre-wrap">{{ q.q }}</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <form method="post" action="/cases/template/{{ tpl.key }}/submit" x-data="{ count: 0 }">
+    <label class="block text-sm font-semibold mb-2">
+      你的答案 (建议 600-1500 字, 按 [问题1] [问题2] [问题3] 分段作答)
+      <span class="text-slate-400 font-normal">— 当前 <span x-text="count"></span> 字</span>
+    </label>
+    <textarea name="user_answer" rows="20"
+              @input="count = $event.target.value.length"
+              placeholder="[问题1] ..."
+              class="w-full border border-slate-300 rounded p-3 font-mono text-sm focus:border-indigo-500 focus:outline-none"
+              required></textarea>
+    <div class="mt-4 flex gap-3 items-center">
+      <button class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+        提交 (AI 评分 10-30 秒)
+      </button>
+      <a href="/cases/" class="text-sm text-slate-500 hover:text-indigo-700">取消</a>
+      <span class="ml-auto text-xs text-slate-400">⚠️ 评分会消耗 API 额度 (~¥0.05/次)</span>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

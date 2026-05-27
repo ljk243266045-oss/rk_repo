@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}题目审核 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-3">✏️ 题目审核</h1>
+<p class="text-sm text-slate-500 mb-4">
+  待审核 <strong class="text-amber-700">{{ pending }}</strong>
+  {% if chapter_id %}
+    · <a href="/questions/review" class="text-indigo-600 hover:underline">显示全部章节</a>
+  {% endif %}
+</p>
+
+{% if not q %}
+  <div class="bg-emerald-50 border border-emerald-200 rounded p-6 text-center">
+    <div class="text-3xl mb-2">🎉</div>
+    <div class="font-bold text-emerald-800">没有待审核的题目了!</div>
+    <a href="/questions/" class="inline-block mt-3 text-indigo-600 hover:underline">← 返回题库</a>
+  </div>
+{% else %}
+  <div class="bg-white rounded-lg shadow p-6 max-w-3xl">
+    <div class="text-xs text-slate-400 mb-2">
+      Q#{{ q.id }} · 难度 {{ q.difficulty }}/5 · 来源 {{ q.ai_model or q.source }}
+    </div>
+    <div class="text-lg font-medium mb-4 whitespace-pre-wrap">{{ q.stem }}</div>
+    <ol class="space-y-2 mb-4">
+      {% for opt in q.options %}
+        <li class="p-2 rounded {% if opt.startswith(q.answer + '.') or opt.startswith(q.answer + '. ') %}bg-emerald-50 border border-emerald-200{% else %}bg-slate-50{% endif %}">
+          {{ opt }}
+        </li>
+      {% endfor %}
+    </ol>
+    <div class="mt-4 text-sm bg-slate-50 p-3 rounded border border-slate-200">
+      <span class="font-semibold text-emerald-700">正确答案: {{ q.answer }}</span>
+      {% if q.explanation %}
+        <div class="text-slate-700 mt-2 whitespace-pre-wrap">{{ q.explanation }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mt-5 flex gap-3">
+      <form method="post" action="/questions/{{ q.id }}/verify">
+        <input type="hidden" name="action" value="approve">
+        {% if chapter_id %}<input type="hidden" name="chapter_id" value="{{ chapter_id }}">{% endif %}
+        <button class="px-5 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">✓ 通过 (Enter)</button>
+      </form>
+      <form method="post" action="/questions/{{ q.id }}/verify">
+        <input type="hidden" name="action" value="reject">
+        {% if chapter_id %}<input type="hidden" name="chapter_id" value="{{ chapter_id }}">{% endif %}
+        <button class="px-5 py-2 bg-rose-600 text-white rounded hover:bg-rose-700">✗ 删除 (Esc)</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'Enter') { document.querySelector('button.bg-emerald-600')?.click(); }
+      else if (e.key === 'Escape') { document.querySelector('button.bg-rose-600')?.click(); }
+    });
+  </script>
+{% endif %}
+
+{% endblock %}

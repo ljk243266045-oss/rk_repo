@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}刷题中 · {{ index + 1 }}/{{ total }}{% endblock %}
+{% block content %}
+
+<div x-data="quizApp({{ queue_json|safe }}, {{ index }}, {{ score }}, '{{ mode }}', {{ chapter_id or 'null' }})">
+
+<div class="mb-4 flex items-center gap-4">
+  <a href="/quiz/" class="text-sm text-slate-500 hover:text-indigo-700">← 退出</a>
+  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+    <div class="bg-indigo-600 h-2" :style="`width:${((index)/total*100).toFixed(1)}%`"></div>
+  </div>
+  <div class="text-sm text-slate-600">
+    <span x-text="index + 1"></span> / <span x-text="total"></span>
+    · ✓ <span class="text-emerald-700 font-bold" x-text="score"></span>
+  </div>
+</div>
+
+<div id="quiz-area">
+  {% include "_quiz_question.html" %}
+</div>
+
+<script>
+function quizApp(queue, index, score, mode, chapter_id) {
+  return {
+    queue, index, score, mode, chapter_id,
+    startTime: Date.now(),
+    selected: null,
+    locked: false,
+    onSelect(letter) {
+      if (this.locked) return;
+      this.selected = letter;
+    },
+    submitAnswer() {
+      if (!this.selected || this.locked) return;
+      this.locked = true;
+      const form = document.querySelector('#answer-form');
+      form.querySelector('input[name=user_answer]').value = this.selected;
+      form.querySelector('input[name=time_spent_sec]').value = Math.round((Date.now() - this.startTime) / 1000);
+      htmx.trigger(form, 'submit');
+    },
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const app = Alpine.$data(document.querySelector('[x-data^="quizApp"]'));
+  if (!app) return;
+  if (['A','B','C','D','a','b','c','d'].includes(e.key)) {
+    app.onSelect(e.key.toUpperCase());
+  } else if (e.key === 'Enter' || e.code === 'Space') {
+    e.preventDefault();
+    const nextBtn = document.querySelector('#next-btn');
+    if (nextBtn) nextBtn.click();
+    else app.submitAnswer();
+  }
+});
+</script>
+
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}论文训练 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-3">📝 论文训练</h1>
+<p class="text-sm text-slate-500 mb-6">
+  10 个论文题目。考试中 2 选 1, 时间 2 小时, 字数 2500 字左右,满分 75, 45 分及格。
+  本系统支持 <strong>outline 模式</strong>(先列大纲拿反馈) 和 <strong>整篇模式</strong>(写完整论文)。
+</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  {% for t in topics_list %}
+  <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition">
+    <div class="text-xs text-indigo-600 font-semibold">{{ t.category }}</div>
+    <h3 class="text-lg font-bold mt-1 mb-2">{{ t.title }}</h3>
+    <p class="text-sm text-slate-600 mb-3">{{ t.abstract }}</p>
+    <a href="/essays/topic/{{ t.key }}" class="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700">写作 →</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if attempts %}
+<section class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-lg font-bold mb-3">📜 最近 10 篇</h2>
+  <ul class="text-sm space-y-1">
+    {% for a in attempts %}
+      <li>
+        <a href="/essays/attempts/{{ a.id }}" class="text-indigo-600 hover:underline">{{ a.topic }}</a>
+        — <strong class="{% if a.ai_score and a.ai_score >= 45 %}text-emerald-700{% else %}text-rose-600{% endif %}">{{ a.ai_score or 0 }}/75</strong>
+        ({{ a.word_count }} 字)
+        <span class="text-slate-400">· {{ a.submitted_at.strftime("%m-%d %H:%M") if a.submitted_at else "" }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}

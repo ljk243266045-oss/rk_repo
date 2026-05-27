@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}新建闪卡 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">➕ 新建闪卡</h1>
+
+<form method="post" action="/cards/new" class="bg-white rounded-lg shadow p-6 max-w-3xl space-y-4">
+  <div>
+    <label class="block text-sm font-semibold text-slate-700 mb-1">正面 (问题)</label>
+    <textarea name="front" rows="3" required
+              placeholder="例如:云计算的5大内部特征是什么?"
+              class="w-full border border-slate-300 rounded p-2 focus:border-indigo-500 focus:outline-none"></textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-semibold text-slate-700 mb-1">反面 (答案)</label>
+    <textarea name="back" rows="6" required
+              placeholder="按需快速记忆;支持多行。"
+              class="w-full border border-slate-300 rounded p-2 focus:border-indigo-500 focus:outline-none"></textarea>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-1">所属章节</label>
+      <select name="chapter_id" class="w-full border border-slate-300 rounded p-2">
+        <option value="">(无)</option>
+        {% for ch in chapters %}
+          <option value="{{ ch.id }}">第{{ ch.chapter_no }}章 {{ ch.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-slate-700 mb-1">标签 (逗号分隔, 可选)</label>
+      <input name="tags" placeholder="例如:云计算, 5特征"
+             class="w-full border border-slate-300 rounded p-2">
+    </div>
+  </div>
+
+  <div class="flex gap-3">
+    <button class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">保存</button>
+    <a href="/cards/" class="px-5 py-2 border border-slate-300 rounded hover:bg-slate-50">取消</a>
+  </div>
+</form>
+
+{% endblock %}

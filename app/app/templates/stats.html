@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}学习数据 · 软考备考系统{% endblock %}
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">📊 学习数据</h1>
+
+<div class="grid grid-cols-5 gap-3 mb-6">
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs text-slate-500">连续学习</div>
+    <div class="text-2xl font-bold text-amber-600 mt-1">{{ streak }} 天</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs text-slate-500">总刷题数</div>
+    <div class="text-2xl font-bold text-indigo-700 mt-1">{{ total_attempts }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs text-slate-500">整体正确率</div>
+    <div class="text-2xl font-bold {% if overall_accuracy and overall_accuracy >= 60 %}text-emerald-700{% else %}text-rose-600{% endif %} mt-1">
+      {% if overall_accuracy is not none %}{{ '%.0f'|format(overall_accuracy) }}%{% else %}—{% endif %}
+    </div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs text-slate-500">闪卡复习</div>
+    <div class="text-2xl font-bold text-indigo-700 mt-1">{{ total_reviews }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs text-slate-500">未掌握错题</div>
+    <div class="text-2xl font-bold {% if open_mistakes > 0 %}text-rose-600{% else %}text-slate-400{% endif %} mt-1">{{ open_mistakes }}</div>
+  </div>
+</div>
+
+<section class="bg-white rounded-lg shadow p-6 mb-6">
+  <h2 class="text-lg font-bold mb-3">📅 学习热图(近 90 天)</h2>
+  <div class="overflow-x-auto">
+    <div class="inline-grid gap-[3px]"
+         style="grid-template-columns: repeat(14, 14px); grid-auto-rows: 14px;">
+      {% for d in heatmap %}
+        {% set total = d.cards + d.questions %}
+        {% set level = 0 %}
+        {% if total >= 1 %}{% set level = 1 %}{% endif %}
+        {% if total >= 10 %}{% set level = 2 %}{% endif %}
+        {% if total >= 30 %}{% set level = 3 %}{% endif %}
+        {% if total >= 60 %}{% set level = 4 %}{% endif %}
+        <div title="{{ d.date }}: 卡片 {{ d.cards }} · 题目 {{ d.questions }}"
+             class="rounded-sm cursor-default
+                    {% if level == 0 %}bg-slate-100{% endif %}
+                    {% if level == 1 %}bg-emerald-200{% endif %}
+                    {% if level == 2 %}bg-emerald-400{% endif %}
+                    {% if level == 3 %}bg-emerald-600{% endif %}
+                    {% if level == 4 %}bg-emerald-800{% endif %}
+                    {% if d.date == today %}ring-2 ring-indigo-500{% endif %}"></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="text-xs text-slate-500 mt-3 flex items-center gap-2">
+    少 <span class="inline-block w-3 h-3 rounded-sm bg-slate-100"></span>
+    <span class="inline-block w-3 h-3 rounded-sm bg-emerald-200"></span>
+    <span class="inline-block w-3 h-3 rounded-sm bg-emerald-400"></span>
+    <span class="inline-block w-3 h-3 rounded-sm bg-emerald-600"></span>
+    <span class="inline-block w-3 h-3 rounded-sm bg-emerald-800"></span> 多
+  </div>
+</section>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  <section class="bg-white rounded-lg shadow p-5">
+    <h2 class="text-lg font-bold mb-2">🎯 预测通过率(综合知识)</h2>
+    <div class="text-center my-4">
+      <div class="text-5xl font-bold {% if predicted_pass %}text-emerald-700{% else %}text-rose-600{% endif %}">
+        {{ '%.0f'|format(pred_score_75) }}
+      </div>
+      <div class="text-sm text-slate-500 mt-1">/ 75 (≥ 45 及格)</div>
+      <div class="text-sm mt-2 {% if predicted_pass %}text-emerald-700{% else %}text-rose-600{% endif %}">
+        {% if covered_weight == 0 %}
+          📭 还没有刷题数据
+        {% elif predicted_pass %}
+          ✅ 当前节奏预测通过 (基于 {{ '%.0f'|format(covered_weight) }}% 知识权重覆盖)
+        {% else %}
+          ⚠️ 当前预测未达及格线(还差 {{ '%.0f'|format(45 - pred_score_75) }} 分)
+        {% endif %}
+      </div>
+    </div>
+    <p class="text-xs text-slate-400 mt-2">预测基于各章正确率,按教材 4 篇权重 (基础 10% / 方法 40% / 能力 35% / 实践 15%) 加权;仅供参考。</p>
+  </section>
+
+  <section class="bg-white rounded-lg shadow p-5">
+    <h2 class="text-lg font-bold mb-2">🕸 知识掌握雷达</h2>
+    <canvas id="radarChart" style="max-height:280px"></canvas>
+  </section>
+</div>
+
+<section class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-lg font-bold mb-3">📈 各章正确率</h2>
+  <canvas id="chapterChart" style="max-height:360px"></canvas>
+</section>
+
+<script>
+const radarData = {{ radar|tojson }};
+new Chart(document.getElementById('radarChart').getContext('2d'), {
+  type: 'radar',
+  data: {
+    labels: radarData.map(r => r.dim + ` (${r.covered}/${r.total})`),
+    datasets: [{
+      label: '正确率 %',
+      data: radarData.map(r => r.accuracy.toFixed(1)),
+      backgroundColor: 'rgba(99, 102, 241, 0.2)',
+      borderColor: '#6366f1',
+      pointBackgroundColor: '#6366f1',
+    }],
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } } },
+  },
+});
+
+const ctx = document.getElementById('chapterChart').getContext('2d');
+const data = {{ per_chapter|tojson }};
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: data.map(r => `第${r.chapter_no}章 ${r.title}`),
+    datasets: [
+      {
+        label: '正确率 (%)',
+        data: data.map(r => r.accuracy === null ? 0 : r.accuracy),
+        backgroundColor: data.map(r => r.accuracy === null ? '#e2e8f0'
+            : r.accuracy >= 60 ? '#10b981' : '#f43f5e'),
+      },
+      {
+        label: '尝试数',
+        data: data.map(r => r.attempts),
+        type: 'line', yAxisID: 'y1', borderColor: '#6366f1', tension: 0.3,
+      },
+    ],
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true, max: 100, title: { text: '正确率 %', display: true }},
+      y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { text: '尝试数', display: true } },
+    },
+  },
+});
+</script>
+
+{% endblock %}

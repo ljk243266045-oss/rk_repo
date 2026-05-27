@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}案例评分结果 · #{{ c.id }}{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl">
+  <a href="/cases/" class="text-sm text-slate-500 hover:text-indigo-700">← 返回案例列表</a>
+
+  <div class="my-3 flex items-center gap-4">
+    <h1 class="text-2xl font-bold">{{ c.questions.title if c.questions else "案例评分" }}</h1>
+    {% set pct = (c.ai_score / 25 * 100) if c.ai_score else 0 %}
+    <div class="text-2xl font-bold {% if c.ai_score and c.ai_score >= 15 %}text-emerald-700{% else %}text-rose-600{% endif %}">
+      {{ c.ai_score or 0 }} / 25
+    </div>
+    <span class="text-sm text-slate-500">({{ '%.0f'|format(pct) }}%)</span>
+  </div>
+
+  <section class="bg-white rounded-lg shadow p-5 mb-5">
+    <h2 class="text-lg font-bold mb-2">你的答案</h2>
+    <div class="text-slate-700 whitespace-pre-wrap text-sm bg-slate-50 p-3 rounded">{{ user_answer }}</div>
+  </section>
+
+  <section class="bg-white rounded-lg shadow p-5 mb-5 prose-cn">
+    {{ c.ai_feedback_md|md|safe }}
+  </section>
+
+  <div class="flex gap-3">
+    <a href="/cases/template/{{ c.questions._template_key }}" class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">🔁 再次尝试</a>
+    <a href="/cases/" class="px-5 py-2 border border-slate-300 rounded hover:bg-slate-50">返回列表</a>
+  </div>
+</div>
+
+{% endblock %}

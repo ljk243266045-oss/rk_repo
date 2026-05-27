@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}论文模拟 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-2">📜 论文模拟 (2 选 1)</h1>
+<p class="text-sm text-slate-500 mb-4">考试时间 2 小时, 2500 字左右, 时间到自动提交。先选题再写正文。</p>
+
+{% include "_mock_timer.html" %}
+
+<form id="mock-form" method="post" action="/mock/essay/{{ mock_id }}/submit"
+      x-data="{ chosen: '', count: 0 }" class="max-w-4xl">
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+    {% for t in topics %}
+      <label class="bg-white rounded-lg shadow p-5 cursor-pointer block transition"
+             :class="chosen === '{{ t.key }}' ? 'ring-2 ring-indigo-500' : ''">
+        <input type="radio" name="chosen_key" value="{{ t.key }}"
+               x-model="chosen" required class="mr-2">
+        <span class="text-xs text-indigo-600 font-semibold">{{ t.category }}</span>
+        <h3 class="text-lg font-bold mt-1 mb-2">{{ t.title }}</h3>
+        <p class="text-sm text-slate-600 mb-2">{{ t.abstract }}</p>
+        <pre class="text-xs text-slate-500 whitespace-pre-wrap bg-slate-50 p-2 rounded">{{ t.outline_hint }}</pre>
+      </label>
+    {% endfor %}
+  </div>
+
+  <label class="block text-sm font-semibold mb-2">
+    论文正文 <span class="text-slate-400 font-normal">— 当前 <span x-text="count"></span> 字</span>
+  </label>
+  <textarea name="body" rows="20" required
+            @input="count = $event.target.value.length"
+            placeholder="选定题目后开始写..."
+            class="w-full border border-slate-300 rounded p-3 font-mono text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+
+  <div class="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 mt-4 flex gap-3 items-center">
+    <button :disabled="!chosen"
+            class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50">
+      提交并 AI 评分
+    </button>
+    <a href="/mock/" class="text-sm text-slate-500 hover:text-indigo-700">放弃</a>
+    <span class="ml-auto text-xs text-slate-400">⚠️ AI 评分 30-60 秒</span>
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}刷题结果{% endblock %}
+{% block content %}
+
+{% set pct = (score / total * 100) if total else 0 %}
+{% set pass75 = (score / total * 75) if total else 0 %}
+
+<div class="bg-white rounded-lg shadow p-8 max-w-2xl mx-auto text-center">
+  <div class="text-4xl mb-3">
+    {% if pct >= 80 %}🏆{% elif pct >= 60 %}👍{% else %}💪{% endif %}
+  </div>
+  <h1 class="text-2xl font-bold mb-2">本轮结束</h1>
+
+  <div class="my-6 grid grid-cols-3 gap-3">
+    <div>
+      <div class="text-3xl font-bold text-indigo-700">{{ score }} / {{ total }}</div>
+      <div class="text-sm text-slate-500">答对</div>
+    </div>
+    <div>
+      <div class="text-3xl font-bold {% if pct >= 60 %}text-emerald-700{% else %}text-rose-600{% endif %}">{{ '%.0f'|format(pct) }}%</div>
+      <div class="text-sm text-slate-500">正确率</div>
+    </div>
+    <div>
+      <div class="text-3xl font-bold {% if pass75 >= 45 %}text-emerald-700{% else %}text-rose-600{% endif %}">{{ '%.0f'|format(pass75) }}</div>
+      <div class="text-sm text-slate-500">折算 /75</div>
+    </div>
+  </div>
+
+  <p class="text-sm text-slate-600 mb-6">
+    {% if pass75 >= 45 %}
+      ✅ 折算分超过 45 分及格线,继续保持!
+    {% else %}
+      ⚠️ 折算分低于 45 分及格线,建议先回错题本巩固。
+    {% endif %}
+  </p>
+
+  <div class="flex justify-center gap-3">
+    <a href="/quiz/" class="px-5 py-2 border border-slate-300 rounded hover:bg-slate-50">← 返回</a>
+    <a href="/quiz/start?mode={{ mode }}&n={{ total }}" class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+      🔁 再来一轮
+    </a>
+  </div>
+</div>
+
+{% endblock %}

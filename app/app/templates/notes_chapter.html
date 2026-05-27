@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}第{{ active.chapter_no }}章 {{ active.title }} · 笔记{% endblock %}
+{% block content %}
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  {% include "_chapter_sidebar.html" %}
+
+  <article class="lg:col-span-3 bg-white rounded-lg shadow p-6 prose-cn">
+    <div class="text-xs text-slate-500 mb-1">
+      第{{ active.book }}篇 {{ active.book_name }}{% if active.page_start %} · 起始 P.{{ active.page_start }}{% endif %}
+    </div>
+    {{ content_md|md|safe }}
+
+    <hr>
+    <div class="flex gap-3 text-sm">
+      <a href="/cards/new?chapter_id={{ active.id }}"
+         class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+        ➕ 基于本章新建闪卡
+      </a>
+      <a href="/notes/" class="px-3 py-2 border border-slate-300 rounded hover:bg-slate-50">
+        ← 返回目录
+      </a>
+    </div>
+  </article>
+</div>
+
+{% endblock %}

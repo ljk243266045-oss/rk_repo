@@ -1,0 +1,61 @@
+{# HTMX-targeted fragment: current card + queue stats. Used by /cards/ and POST /cards/grade. #}
+<div id="card-panel" x-data="{ shown: false }">
+
+  <div class="text-sm text-slate-500 mb-3 flex gap-4">
+    <span>📌 待复习 <strong class="text-rose-600">{{ stats.due_now }}</strong></span>
+    <span>🆕 新卡 <strong>{{ stats.new }}</strong></span>
+    <span>总卡 {{ stats.total }}</span>
+  </div>
+
+  {% if not card %}
+    <div class="bg-emerald-50 border border-emerald-200 rounded p-6 text-center">
+      <div class="text-3xl mb-2">🎉</div>
+      <div class="font-bold text-emerald-800">今日已无待复习卡片</div>
+      <a href="/cards/new" class="inline-block mt-3 text-indigo-600 hover:underline">➕ 新建卡片</a>
+    </div>
+  {% else %}
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="text-xs text-slate-400 mb-1">
+        卡片 #{{ card.id }}
+        {% if card.chapter %} · 第{{ card.chapter.chapter_no }}章 {{ card.chapter.title }}{% endif %}
+      </div>
+
+      <div class="prose-cn text-lg py-4 border-b border-slate-200">
+        {{ card.front }}
+      </div>
+
+      <div x-show="shown" x-collapse class="prose-cn py-4 text-slate-800 whitespace-pre-wrap">
+        {{ card.back }}
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button x-show="!shown" @click="shown = true"
+                class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+          显示答案 (Space)
+        </button>
+
+        <template x-if="shown">
+          <div class="flex gap-2 flex-wrap">
+            {% for r, label, color, hint in [
+              (1, '重来', 'rose', '完全忘了'),
+              (2, '困难', 'amber', '勉强想起'),
+              (3, '良好', 'emerald', '正常回忆'),
+              (4, '简单', 'sky', '毫不费力'),
+            ] %}
+              <form hx-post="/cards/grade" hx-target="#card-panel" hx-swap="outerHTML">
+                <input type="hidden" name="card_id" value="{{ card.id }}">
+                <input type="hidden" name="rating" value="{{ r }}">
+                <button class="px-4 py-2 rounded text-white bg-{{ color }}-600 hover:bg-{{ color }}-700"
+                        title="{{ hint }}">{{ r }} · {{ label }}</button>
+              </form>
+            {% endfor %}
+          </div>
+        </template>
+      </div>
+
+      <div class="mt-4 text-xs text-slate-400">
+        FSRS state={{ card.state }} · S={{ '%.2f'|format(card.stability) }} · D={{ '%.2f'|format(card.difficulty) }}
+      </div>
+    </div>
+  {% endif %}
+</div>

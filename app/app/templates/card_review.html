@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}闪卡复习 · 软考备考系统{% endblock %}
+{% block head_extra %}
+<script>
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    const showBtn = document.querySelector('#card-panel [x-show="!shown"]');
+    if (showBtn) showBtn.click();
+  } else if (['1','2','3','4'].includes(e.key)) {
+    const btn = document.querySelector(`#card-panel form input[value="${e.key}"]`);
+    if (btn) btn.closest('form').querySelector('button').click();
+  }
+});
+</script>
+{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">🃏 闪卡复习</h1>
+<p class="text-sm text-slate-500 mb-4">键盘: Space 显示答案 · 1/2/3/4 评分</p>
+
+{% include "_card_panel.html" %}
+
+{% endblock %}

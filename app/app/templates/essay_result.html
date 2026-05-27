@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ e.topic }} · 评分{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl">
+  <a href="/essays/" class="text-sm text-slate-500 hover:text-indigo-700">← 返回论文列表</a>
+
+  <div class="my-3 flex items-center gap-4">
+    <h1 class="text-xl font-bold">{{ e.topic }}</h1>
+    <div class="text-2xl font-bold {% if e.ai_score and e.ai_score >= 45 %}text-emerald-700{% else %}text-rose-600{% endif %}">
+      {{ e.ai_score or 0 }} / 75
+    </div>
+    <span class="text-sm text-slate-500">字数 {{ e.word_count }}</span>
+  </div>
+
+  <section class="bg-white rounded-lg shadow p-5 mb-5 prose-cn">
+    {{ e.ai_feedback_md|md|safe }}
+  </section>
+
+  {% if e.outline_md %}
+    <section class="bg-slate-50 border border-slate-200 rounded p-4 mb-5">
+      <div class="text-sm font-semibold mb-2">大纲</div>
+      <pre class="whitespace-pre-wrap text-sm text-slate-700">{{ e.outline_md }}</pre>
+    </section>
+  {% endif %}
+
+  <section class="bg-white rounded-lg shadow p-5 mb-5">
+    <div class="text-sm font-semibold mb-2">论文正文</div>
+    <div class="whitespace-pre-wrap text-sm text-slate-700 max-h-[60vh] overflow-y-auto">{{ e.body_md }}</div>
+  </section>
+</div>
+
+{% endblock %}

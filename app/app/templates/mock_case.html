@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}案例分析模拟 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-2">📋 案例分析模拟 (3 道)</h1>
+<p class="text-sm text-slate-500 mb-4">考试时间 1.5 小时, 时间到自动提交。每道答完整 + 分点作答。</p>
+
+{% include "_mock_timer.html" %}
+
+<form id="mock-form" method="post" action="/mock/case/{{ mock_id }}/submit" class="max-w-4xl">
+  {% for c in cases %}
+    <div class="bg-white rounded-lg shadow p-5 mb-5">
+      <div class="text-xs text-indigo-600 mb-1">{{ loop.index }} / {{ cases|length }} · {{ c.domain }}</div>
+      <h3 class="font-bold text-lg mb-2">{{ c.title }}</h3>
+      <div class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed mb-3 bg-slate-50 p-3 rounded">{{ c.scenario }}</div>
+      <ol class="text-sm text-slate-800 mb-3 space-y-1">
+        {% for q in c.questions %}<li class="whitespace-pre-wrap">{{ q.q }}</li>{% endfor %}
+      </ol>
+      <textarea name="ans_{{ c.key }}" rows="10"
+                placeholder="[问题1] ..."
+                class="w-full border border-slate-300 rounded p-2 font-mono text-xs focus:border-indigo-500 focus:outline-none"></textarea>
+    </div>
+  {% endfor %}
+
+  <div class="sticky bottom-4 bg-white rounded-lg shadow-lg p-4 flex gap-3 items-center">
+    <button class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">提交并 AI 评分</button>
+    <a href="/mock/" class="text-sm text-slate-500 hover:text-indigo-700">放弃</a>
+    <span class="ml-auto text-xs text-slate-400">⚠️ AI 评分 1-2 分钟</span>
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}笔记 · 软考备考系统{% endblock %}
+{% block content %}
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  {% include "_chapter_sidebar.html" %}
+
+  <div class="lg:col-span-3 bg-white rounded-lg shadow p-6">
+    <h1 class="text-2xl font-bold mb-3">📖 全书结构化笔记</h1>
+    {% if books %}
+      {% set total_chapters = namespace(n=0) %}
+      {% for _, _name, chs in books %}{% set total_chapters.n = total_chapters.n + chs|length %}{% endfor %}
+      <p class="text-slate-600 mb-4">左侧选择章节查看。共 {{ books|length }} 篇 {{ total_chapters.n }} 章已导入。</p>
+      <p class="text-slate-700">推荐顺序:<strong>第一篇 基础篇</strong> → 第二篇 方法篇 → 第三篇 能力篇 → 第四篇 实践篇。</p>
+    {% else %}
+      <p class="text-amber-700">还未导入。请运行:<code class="bg-amber-50 px-2">python scripts/seed_chapters.py</code></p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

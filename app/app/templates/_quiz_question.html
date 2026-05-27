@@ -1,0 +1,38 @@
+{# Active question + submit form. Used by quiz_session.html and feedback fragment. #}
+<div class="bg-white rounded-lg shadow p-6 max-w-3xl">
+  <div class="text-xs text-slate-400 mb-2">
+    Q#{{ q.id }} · 难度 {{ q.difficulty }}/5
+    {% if q.chapter %} · 第{{ q.chapter.chapter_no }}章 {{ q.chapter.title }}{% endif %}
+  </div>
+  <div class="text-lg font-medium mb-4 whitespace-pre-wrap">{{ q.stem }}</div>
+
+  <ol class="space-y-2 mb-4">
+    {% for opt in q.options %}
+      {% set letter = opt[0] %}
+      <li>
+        <button @click="onSelect('{{ letter }}')"
+                :class="selected === '{{ letter }}' ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200'"
+                class="w-full text-left p-3 rounded border hover:bg-slate-50 transition">
+          <span class="font-mono mr-1">{{ letter }}.</span>{{ opt[3:] if opt.startswith(letter + '. ') else opt[2:] if opt.startswith(letter + '.') else opt }}
+        </button>
+      </li>
+    {% endfor %}
+  </ol>
+
+  <form id="answer-form" hx-post="/quiz/answer" hx-target="#quiz-area" hx-swap="innerHTML">
+    <input type="hidden" name="qid" value="{{ q.id }}">
+    <input type="hidden" name="user_answer" value="">
+    <input type="hidden" name="mode" value="{{ mode }}">
+    <input type="hidden" name="queue" value='{{ queue_json|safe }}'>
+    <input type="hidden" name="index" value="{{ index }}">
+    <input type="hidden" name="score" value="{{ score }}">
+    {% if chapter_id %}<input type="hidden" name="chapter_id" value="{{ chapter_id }}">{% endif %}
+    <input type="hidden" name="time_spent_sec" value="0">
+    <button type="button" @click="submitAnswer()" :disabled="!selected || locked"
+            class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50">
+      提交 (Enter)
+    </button>
+  </form>
+
+  <p class="text-xs text-slate-400 mt-3">键盘 A/B/C/D 选择 · Enter 提交</p>
+</div>

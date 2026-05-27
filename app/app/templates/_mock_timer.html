@@ -1,0 +1,31 @@
+{# Reusable countdown timer block. Requires Alpine.js data: { remaining: <seconds> } and template-level autoSubmit selector. #}
+<div x-data="{
+       remaining: {{ duration_min * 60 }},
+       formatted: '',
+       interval: null,
+       init() {
+         this.update();
+         this.interval = setInterval(() => {
+           this.remaining--;
+           this.update();
+           if (this.remaining <= 0) {
+             clearInterval(this.interval);
+             const f = document.querySelector('#mock-form');
+             if (f) f.submit();
+           }
+         }, 1000);
+       },
+       update() {
+         const m = Math.floor(this.remaining / 60);
+         const s = this.remaining % 60;
+         this.formatted = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+       }
+     }"
+     x-init="init()"
+     class="fixed top-20 right-4 bg-white border-2 rounded-lg p-3 shadow-lg z-20"
+     :class="remaining < 300 ? 'border-rose-500' : 'border-indigo-500'">
+  <div class="text-xs text-slate-500">剩余时间</div>
+  <div class="text-2xl font-mono font-bold"
+       :class="remaining < 300 ? 'text-rose-600' : 'text-indigo-700'"
+       x-text="formatted"></div>
+</div>

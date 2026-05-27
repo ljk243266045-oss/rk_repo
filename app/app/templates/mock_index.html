@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}模拟考试 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-3">🎯 全真模拟考试</h1>
+<p class="text-sm text-slate-500 mb-6">三个模块独立进行,各自计时。三科都 ≥45/75 才能通过。建议距离考试 1-2 个月每周一次。</p>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <a href="/mock/mcq/start" class="bg-white rounded-lg shadow p-5 hover:shadow-lg transition">
+    <div class="text-3xl mb-2">📝</div>
+    <h3 class="text-lg font-bold mb-2">综合知识</h3>
+    <p class="text-sm text-slate-600 mb-3">75 道单选题<br>限时 <strong>2.5 小时</strong></p>
+    <div class="text-xs text-slate-400">题库可用 {{ mcq_available }} 道</div>
+    {% if mcq_available < 75 %}
+      <div class="text-xs text-amber-600 mt-1">⚠️ 不足 75 道,会按可用题数</div>
+    {% endif %}
+  </a>
+
+  <a href="/mock/case/start" class="bg-white rounded-lg shadow p-5 hover:shadow-lg transition">
+    <div class="text-3xl mb-2">📋</div>
+    <h3 class="text-lg font-bold mb-2">案例分析</h3>
+    <p class="text-sm text-slate-600 mb-3">3 道场景题<br>限时 <strong>1.5 小时</strong></p>
+    <div class="text-xs text-slate-400">从 10 个场景中随机抽 3 个</div>
+  </a>
+
+  <a href="/mock/essay/start" class="bg-white rounded-lg shadow p-5 hover:shadow-lg transition">
+    <div class="text-3xl mb-2">📜</div>
+    <h3 class="text-lg font-bold mb-2">论文</h3>
+    <p class="text-sm text-slate-600 mb-3">2 选 1, ≈2500 字<br>限时 <strong>2 小时</strong></p>
+    <div class="text-xs text-slate-400">随机给 2 个题目供选择</div>
+  </a>
+</div>
+
+{% if history %}
+<section class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-lg font-bold mb-3">📜 历次模拟记录</h2>
+  <table class="w-full text-sm">
+    <thead class="bg-slate-100 text-slate-700">
+      <tr>
+        <th class="text-left p-2">开始时间</th>
+        <th class="text-left p-2">模块</th>
+        <th class="text-right p-2">用时</th>
+        <th class="text-right p-2">综合</th>
+        <th class="text-right p-2">案例</th>
+        <th class="text-right p-2">论文</th>
+        <th class="text-center p-2">结果</th>
+        <th class="text-center p-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in history %}
+        <tr class="border-t border-slate-100">
+          <td class="p-2">{{ m.started_at.strftime("%Y-%m-%d %H:%M") }}</td>
+          <td class="p-2">{{ m.mode }}</td>
+          <td class="p-2 text-right text-slate-500">
+            {% if m.duration_sec %}{{ (m.duration_sec / 60)|int }} 分{% else %}—{% endif %}
+          </td>
+          <td class="p-2 text-right">{% if m.score_mcq is not none %}{{ m.score_mcq }}/75{% else %}—{% endif %}</td>
+          <td class="p-2 text-right">{% if m.score_case is not none %}{{ m.score_case }}/75{% else %}—{% endif %}</td>
+          <td class="p-2 text-right">{% if m.score_essay is not none %}{{ m.score_essay }}/75{% else %}—{% endif %}</td>
+          <td class="p-2 text-center">
+            {% if m.passed is none %}<span class="text-slate-400">未完成</span>
+            {% elif m.passed %}<span class="text-emerald-700">✓</span>
+            {% else %}<span class="text-rose-600">✗</span>{% endif %}
+          </td>
+          <td class="p-2 text-center"><a href="/mock/{{ m.id }}" class="text-indigo-600 hover:underline text-xs">详情</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% endblock %}

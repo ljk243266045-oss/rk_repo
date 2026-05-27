@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}首页 · 软考备考系统{% endblock %}
+{% block content %}
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  <div class="bg-white rounded-lg shadow p-5">
+    <div class="text-slate-500 text-sm">已导入章节</div>
+    <div class="text-3xl font-bold text-indigo-700 mt-1">{{ chapter_count }} / 24</div>
+    {% if chapter_count == 0 %}
+      <p class="text-amber-700 text-xs mt-2">⚠️ 还未导入笔记。在 app/ 目录运行:<br>
+        <code class="bg-amber-50 px-2">python scripts/seed_chapters.py</code></p>
+    {% endif %}
+  </div>
+  <div class="bg-white rounded-lg shadow p-5">
+    <div class="text-slate-500 text-sm">闪卡总数</div>
+    <div class="text-3xl font-bold text-indigo-700 mt-1">{{ card_count }}</div>
+    <a href="/cards/new" class="text-xs text-indigo-600 hover:underline">➕ 新建卡片</a>
+  </div>
+  <div class="bg-white rounded-lg shadow p-5">
+    <div class="text-slate-500 text-sm">待复习</div>
+    <div class="text-3xl font-bold text-rose-600 mt-1">{{ due_count }}</div>
+    {% if due_count > 0 %}
+      <a href="/cards/" class="text-xs text-indigo-600 hover:underline">🃏 开始复习</a>
+    {% else %}
+      <span class="text-xs text-slate-400">暂无待复习</span>
+    {% endif %}
+  </div>
+</div>
+
+<section class="bg-white rounded-lg shadow p-6 mb-6">
+  <h2 class="text-xl font-bold mb-3">开始备考</h2>
+  <ol class="list-decimal pl-6 space-y-2 text-slate-700">
+    <li>打开 <a href="/notes/" class="text-indigo-600 hover:underline">📖 笔记浏览器</a>,从第 1 章开始通读。</li>
+    <li>每读完一节,把核心概念用 <a href="/cards/new" class="text-indigo-600 hover:underline">➕ 新建卡片</a> 做成闪卡(正面问题、反面答案)。</li>
+    <li>每天打开 <a href="/cards/" class="text-indigo-600 hover:underline">🃏 复习</a>,FSRS 会自动调度。</li>
+    <li>P1 阶段会接入 <span class="text-slate-400">AI 出题 / RAG 问答 / 案例评分(待开发)</span>。</li>
+  </ol>
+</section>
+
+<section class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-xl font-bold mb-3">系统信息</h2>
+  <dl class="grid grid-cols-2 gap-y-1 text-sm">
+    <dt class="text-slate-500">LLM 模型(.env)</dt><dd><code>{{ llm_model }}</code></dd>
+    <dt class="text-slate-500">SRS 算法</dt><dd>FSRS-4.5(默认参数)</dd>
+    <dt class="text-slate-500">目标考期</dt><dd>2026 年 11 月</dd>
+  </dl>
+</section>
+
+{% endblock %}

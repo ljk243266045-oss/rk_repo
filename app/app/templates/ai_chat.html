@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}AI 问答 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">🤖 AI 问答 (基于教材 RAG)</h1>
+<p class="text-sm text-slate-500 mb-4">模型: <code>{{ llm_model }}</code> · 答案严格基于检索到的教材段落</p>
+
+<div x-data="chatApp()" class="bg-white rounded-lg shadow p-6 max-w-4xl">
+  <form @submit.prevent="ask">
+    <div class="flex gap-2">
+      <select x-model="chapterId" class="border border-slate-300 rounded p-2 text-sm">
+        <option value="">全部章节</option>
+        {% for c in chapters %}
+          <option value="{{ c.id }}">第{{ c.chapter_no }}章 {{ c.title }}</option>
+        {% endfor %}
+      </select>
+      <input x-model="question" type="text" required
+             placeholder="例:云数据中心的 5 大核心要素是什么?"
+             class="flex-1 border border-slate-300 rounded p-2 focus:border-indigo-500 focus:outline-none">
+      <button :disabled="busy"
+              class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50">
+        <span x-show="!busy">提问</span>
+        <span x-show="busy">思考中...</span>
+      </button>
+    </div>
+  </form>
+
+  <div x-show="answer || error" class="mt-6">
+    <div x-show="answer" class="prose-cn p-4 bg-slate-50 rounded border border-slate-200 whitespace-pre-wrap" x-text="answer"></div>
+    <div x-show="error" class="mt-2 text-rose-700 text-sm" x-text="error"></div>
+
+    <div x-show="citations.length > 0" class="mt-3 text-xs text-slate-600">
+      <div class="font-semibold mb-1">📎 参考片段</div>
+      <ol class="list-decimal pl-5 space-y-0.5">
+        <template x-for="c in citations" :key="c.i">
+          <li>
+            <span x-text="c.section"></span>
+            <template x-if="c.page"><span class="text-slate-400" x-text="' · P.' + c.page"></span></template>
+          </li>
+        </template>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+function chatApp() {
+  return {
+    question: '',
+    chapterId: '',
+    answer: '',
+    citations: [],
+    error: '',
+    busy: false,
+    async ask() {
+      this.answer = ''; this.citations = []; this.error = ''; this.busy = true;
+      try {
+        const fd = new FormData();
+        fd.append('question', this.question);
+        if (this.chapterId) fd.append('chapter_id', this.chapterId);
+        const resp = await fetch('/ai/chat/stream', { method: 'POST', body: fd });
+        if (!resp.ok) { this.error = 'HTTP ' + resp.status + ': ' + (await resp.text()); this.busy = false; return; }
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '';
+        let currentEvent = 'message';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf('\n\n')) >= 0) {
+            const raw = buf.slice(0, idx); buf = buf.slice(idx + 2);
+            let evt = 'message', data = '';
+            for (const line of raw.split('\n')) {
+              if (line.startsWith('event:')) evt = line.slice(6).trim();
+              else if (line.startsWith('data:')) data += line.slice(5).trim();
+            }
+            if (!data) continue;
+            try {
+              const obj = JSON.parse(data);
+              if (evt === 'citations') this.citations = obj;
+              else if (evt === 'error') this.error = obj.message || 'error';
+              else if (evt === 'done') {}
+              else if (obj.token) this.answer += obj.token;
+            } catch(e) {}
+          }
+        }
+      } catch (e) { this.error = String(e); }
+      this.busy = false;
+    }
+  }
+}
+</script>
+
+{% endblock %}

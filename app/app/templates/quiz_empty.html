@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8 max-w-2xl mx-auto text-center">
+  <div class="text-4xl mb-3">📭</div>
+  <h1 class="text-xl font-bold mb-2">{{ message }}</h1>
+  <a href="/quiz/" class="text-indigo-600 hover:underline">← 返回刷题首页</a>
+  <a href="/questions/" class="ml-4 text-indigo-600 hover:underline">→ 题库管理</a>
+</div>
+{% endblock %}

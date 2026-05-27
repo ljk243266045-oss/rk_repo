@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}软考备考系统{% endblock %}</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
+<script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<style>
+  body { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
+  .prose-cn h1 { font-size:1.6rem; font-weight:700; margin:1rem 0 0.6rem; }
+  .prose-cn h2 { font-size:1.25rem; font-weight:700; margin:1.2rem 0 0.5rem; color:#1e40af; }
+  .prose-cn h3 { font-size:1.05rem; font-weight:600; margin:0.9rem 0 0.4rem; color:#3730a3; }
+  .prose-cn ul { list-style:disc; margin-left:1.5rem; line-height:1.8; }
+  .prose-cn ol { list-style:decimal; margin-left:1.5rem; line-height:1.8; }
+  .prose-cn li { margin:0.15rem 0; }
+  .prose-cn p { margin:0.55rem 0; line-height:1.85; }
+  .prose-cn strong { color:#0f172a; }
+  .prose-cn code { background:#f1f5f9; padding:0 0.3em; border-radius:3px; font-size:0.92em; }
+  .prose-cn table { border-collapse:collapse; margin:0.6rem 0; }
+  .prose-cn th, .prose-cn td { border:1px solid #cbd5e1; padding:0.3rem 0.7rem; }
+  .prose-cn th { background:#f1f5f9; }
+  .prose-cn hr { margin:1.2rem 0; border-color:#e2e8f0; }
+</style>
+{% block head_extra %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6 sticky top-0 z-10">
+  <a href="/" class="text-lg font-bold text-indigo-700">软考备考</a>
+  <a href="/notes/" class="hover:text-indigo-700">📖 笔记</a>
+  <a href="/cards/" class="hover:text-indigo-700">🃏 闪卡</a>
+  <a href="/quiz/" class="hover:text-indigo-700">📝 刷题</a>
+  <a href="/cases/" class="hover:text-indigo-700">📋 案例</a>
+  <a href="/essays/" class="hover:text-indigo-700">📜 论文</a>
+  <a href="/mock/" class="hover:text-indigo-700">🎯 模考</a>
+  <a href="/questions/" class="hover:text-indigo-700">📚 题库</a>
+  <a href="/ai/chat" class="hover:text-indigo-700">🤖 AI</a>
+  <a href="/stats/" class="hover:text-indigo-700">📊 数据</a>
+  <span class="ml-auto text-sm text-slate-500">2026 年 11 月 · 系统规划与管理师</span>
+</nav>
+
+<main class="max-w-7xl mx-auto p-6">
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

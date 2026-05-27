@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}模考结果 #{{ mock.id }}{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl">
+  <a href="/mock/" class="text-sm text-slate-500 hover:text-indigo-700">← 返回模考</a>
+
+  <h1 class="text-2xl font-bold mt-2 mb-3">模考 #{{ mock.id }} · {{ mock.mode }}</h1>
+  <div class="text-sm text-slate-500 mb-4">
+    {{ mock.started_at.strftime("%Y-%m-%d %H:%M") }}
+    {% if mock.duration_sec %}
+      · 用时 {{ (mock.duration_sec / 60)|int }} 分 {{ mock.duration_sec % 60 }} 秒
+    {% endif %}
+  </div>
+
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-white rounded-lg shadow p-5 text-center">
+      <div class="text-xs text-slate-500">综合知识</div>
+      <div class="text-3xl font-bold mt-1 {% if mock.score_mcq and mock.score_mcq >= 45 %}text-emerald-700{% elif mock.score_mcq is not none %}text-rose-600{% else %}text-slate-300{% endif %}">
+        {% if mock.score_mcq is not none %}{{ mock.score_mcq }}{% else %}—{% endif %}
+      </div>
+      <div class="text-xs text-slate-400">/ 75</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-5 text-center">
+      <div class="text-xs text-slate-500">案例分析</div>
+      <div class="text-3xl font-bold mt-1 {% if mock.score_case and mock.score_case >= 45 %}text-emerald-700{% elif mock.score_case is not none %}text-rose-600{% else %}text-slate-300{% endif %}">
+        {% if mock.score_case is not none %}{{ mock.score_case }}{% else %}—{% endif %}
+      </div>
+      <div class="text-xs text-slate-400">/ 75</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-5 text-center">
+      <div class="text-xs text-slate-500">论文</div>
+      <div class="text-3xl font-bold mt-1 {% if mock.score_essay and mock.score_essay >= 45 %}text-emerald-700{% elif mock.score_essay is not none %}text-rose-600{% else %}text-slate-300{% endif %}">
+        {% if mock.score_essay is not none %}{{ mock.score_essay }}{% else %}—{% endif %}
+      </div>
+      <div class="text-xs text-slate-400">/ 75</div>
+    </div>
+  </div>
+
+  {% if mock.mode == "mcq" and mock.payload and mock.payload.correct is defined %}
+    <section class="bg-white rounded-lg shadow p-5 mb-5">
+      <h2 class="text-lg font-bold mb-2">综合知识 — 详细</h2>
+      <p>答对 <strong class="text-emerald-700">{{ mock.payload.correct }}</strong> / {{ mock.payload.total }}</p>
+    </section>
+  {% endif %}
+
+  {% if mock.payload and mock.payload.feedback_md %}
+    <section class="bg-white rounded-lg shadow p-5 mb-5 prose-cn">
+      {{ mock.payload.feedback_md|md|safe }}
+    </section>
+  {% endif %}
+
+  {% if mock.passed %}
+    <div class="bg-emerald-50 border border-emerald-200 rounded p-4 text-emerald-800 text-center">🎉 本模块达到 45 分及格线</div>
+  {% elif mock.passed is not none %}
+    <div class="bg-rose-50 border border-rose-200 rounded p-4 text-rose-800 text-center">⚠️ 未达 45 分及格线,继续巩固</div>
+  {% endif %}
+</div>
+
+{% endblock %}

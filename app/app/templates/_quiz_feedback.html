@@ -1,0 +1,50 @@
+{# After submit: show feedback + next-question button (or finish). #}
+<div class="bg-white rounded-lg shadow p-6 max-w-3xl">
+  <div class="text-xs text-slate-400 mb-2">Q#{{ q.id }}</div>
+  <div class="text-lg font-medium mb-3 whitespace-pre-wrap">{{ q.stem }}</div>
+
+  <ol class="space-y-2 mb-4">
+    {% for opt in q.options %}
+      {% set letter = opt[0] %}
+      <li class="p-3 rounded border
+        {% if letter == q.answer %}border-emerald-500 bg-emerald-50
+        {% elif letter == user_answer %}border-rose-500 bg-rose-50
+        {% else %}border-slate-200{% endif %}">
+        <span class="font-mono mr-1">{{ letter }}.</span>{{ opt[3:] if opt.startswith(letter + '. ') else opt[2:] if opt.startswith(letter + '.') else opt }}
+        {% if letter == q.answer %}<span class="ml-2 text-emerald-700 font-bold">← 正确</span>{% endif %}
+        {% if letter == user_answer and letter != q.answer %}<span class="ml-2 text-rose-700">← 你的选择</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+
+  <div class="p-3 rounded {% if correct %}bg-emerald-50 border border-emerald-200{% else %}bg-rose-50 border border-rose-200{% endif %}">
+    <div class="font-semibold {% if correct %}text-emerald-800{% else %}text-rose-800{% endif %}">
+      {% if correct %}✓ 答对了{% else %}✗ 答错了 (正确答案 {{ q.answer }}){% endif %}
+    </div>
+    {% if q.explanation %}
+      <div class="text-sm text-slate-700 mt-2 whitespace-pre-wrap">{{ q.explanation }}</div>
+    {% endif %}
+    {% if not correct %}
+      <div class="text-xs text-slate-500 mt-2">📌 已加入错题本,同时生成对应闪卡进入复习队列。</div>
+    {% endif %}
+  </div>
+
+  <div class="mt-4 flex justify-between items-center">
+    <div class="text-sm text-slate-600">进度 {{ index }} / {{ total }} · ✓ {{ score }}</div>
+    {% if next_q %}
+      <button id="next-btn"
+              hx-get="/quiz/next-fragment?qid={{ next_q.id }}&mode={{ mode }}&index={{ index }}&score={{ score }}{% if chapter_id %}&chapter_id={{ chapter_id }}{% endif %}"
+              hx-vals='{"queue": {{ queue_json|tojson }}}'
+              hx-target="#quiz-area" hx-swap="innerHTML"
+              onclick="Alpine.$data(document.querySelector('[x-data^=quizApp]')).index = {{ index }}; Alpine.$data(document.querySelector('[x-data^=quizApp]')).score = {{ score }}; Alpine.$data(document.querySelector('[x-data^=quizApp]')).selected = null; Alpine.$data(document.querySelector('[x-data^=quizApp]')).locked = false; Alpine.$data(document.querySelector('[x-data^=quizApp]')).startTime = Date.now();"
+              class="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+        下一题 (Enter)
+      </button>
+    {% else %}
+      <a href="/quiz/results?total={{ total }}&score={{ score }}&mode={{ mode }}"
+         class="px-5 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">
+        查看结果 →
+      </a>
+    {% endif %}
+  </div>
+</div>

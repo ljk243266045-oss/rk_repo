@@ -1,0 +1,13 @@
+.env
+data/ruankao.db
+data/ruankao.db-journal
+data/ruankao.db-wal
+data/ruankao.db-shm
+data/backups/
+data/ingestion.log
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.idea/
+.vscode/

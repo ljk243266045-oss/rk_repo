@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}题库 · 软考备考系统{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">📚 题库</h1>
+
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-slate-500 text-sm">题库总数</div>
+    <div class="text-3xl font-bold text-indigo-700 mt-1">{{ grand_total }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-slate-500 text-sm">已审核</div>
+    <div class="text-3xl font-bold text-emerald-700 mt-1">{{ grand_verified }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-slate-500 text-sm">待审核</div>
+    <div class="text-3xl font-bold text-amber-700 mt-1">{{ grand_total - grand_verified }}</div>
+    {% if grand_total > grand_verified %}
+      <a href="/questions/review" class="text-xs text-indigo-600 hover:underline">→ 去审核</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-100 text-slate-700">
+      <tr>
+        <th class="text-left p-3">章节</th>
+        <th class="text-right p-3">总数</th>
+        <th class="text-right p-3">已审核</th>
+        <th class="text-right p-3">待审核</th>
+        <th class="text-center p-3">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="border-t border-slate-100">
+        <td class="p-3">第{{ r.ch.chapter_no }}章 {{ r.ch.title }}</td>
+        <td class="p-3 text-right">{{ r.total }}</td>
+        <td class="p-3 text-right text-emerald-700">{{ r.verified }}</td>
+        <td class="p-3 text-right {% if r.pending > 0 %}text-amber-700 font-semibold{% else %}text-slate-400{% endif %}">{{ r.pending }}</td>
+        <td class="p-3 text-center">
+          <form method="post" action="/ai/generate-mcq" class="inline"
+                onsubmit="event.target.querySelector('button').innerText='生成中...'">
+            <input type="hidden" name="chapter_id" value="{{ r.ch.id }}">
+            <input type="hidden" name="n" value="10">
+            <button class="text-xs bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700">
+              + 生成 10 题
+            </button>
+          </form>
+          {% if r.pending > 0 %}
+            <a href="/questions/review?chapter_id={{ r.ch.id }}"
+               class="text-xs text-indigo-600 hover:underline ml-2">审核</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="text-xs text-slate-500 mt-3">⚠️ AI 出题前必须先运行 <code>python -m app.rag.ingest</code> 构建 RAG 索引。</p>
+
+{% endblock %}

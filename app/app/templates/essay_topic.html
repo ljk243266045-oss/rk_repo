@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.title }} · 论文{% endblock %}
+{% block content %}
+
+<div class="max-w-4xl">
+  <a href="/essays/" class="text-sm text-slate-500 hover:text-indigo-700">← 返回</a>
+  <div class="text-xs text-indigo-600 font-semibold mt-2">{{ topic.category }}</div>
+  <h1 class="text-2xl font-bold mt-1 mb-3">{{ topic.title }}</h1>
+  <p class="text-slate-700 mb-4">{{ topic.abstract }}</p>
+
+  <section class="bg-slate-50 border border-slate-200 rounded p-4 mb-6 text-sm">
+    <div class="font-semibold mb-1">📐 推荐大纲</div>
+    <pre class="whitespace-pre-wrap text-slate-700">{{ topic.outline_hint }}</pre>
+  </section>
+
+  <form method="post" action="/essays/topic/{{ topic.key }}/submit" x-data="{ count: 0 }">
+    <label class="block text-sm font-semibold mb-2">
+      大纲(可选)
+    </label>
+    <textarea name="outline" rows="4"
+              placeholder="可选: 先简要列出 1-2-3-4 大纲"
+              class="w-full border border-slate-300 rounded p-3 text-sm focus:border-indigo-500 focus:outline-none mb-4"></textarea>
+
+    <label class="block text-sm font-semibold mb-2">
+      论文正文 <span class="text-slate-400 font-normal">(建议 2000-2800 字)— 当前 <span x-text="count"></span> 字
+        <span x-show="count >= 2000 && count <= 2800" class="text-emerald-700">✓ 字数达标</span>
+        <span x-show="count > 0 && count < 2000" class="text-amber-700">⚠️ 字数不足</span>
+        <span x-show="count > 2800" class="text-amber-700">⚠️ 字数偏多</span>
+      </span>
+    </label>
+    <textarea name="body" rows="22" required
+              @input="count = $event.target.value.length"
+              placeholder="按 引言 → 项目背景 → 论点展开 → 实施过程 → 教训/改进 结构写作..."
+              class="w-full border border-slate-300 rounded p-3 font-mono text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+
+    <div class="mt-4 flex gap-3 items-center">
+      <button class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">提交 (AI 评分 30-60 秒)</button>
+      <a href="/essays/" class="text-sm text-slate-500 hover:text-indigo-700">取消</a>
+      <span class="ml-auto text-xs text-slate-400">⚠️ 评分会消耗 API 额度 (~¥0.2/次, Claude 评分质量更高)</span>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

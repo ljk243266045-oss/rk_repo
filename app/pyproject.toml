@@ -1,0 +1,28 @@
+[project]
+name = "ruankao-prep"
+version = "0.1.0"
+description = "系统规划与管理师 (软考中级) 备考本地 Web 应用"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0",
+    "sqlite-vec>=0.1.6",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.18",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-dotenv>=1.0",
+    "litellm>=1.55",
+    "fsrs>=4.0",
+    "markdown>=3.7",
+    "pygments>=2.18",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
